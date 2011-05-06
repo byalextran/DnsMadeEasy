@@ -9,6 +9,7 @@ class DnsMadeEasy
 	private $_requestLimit;
 	private $_requestsRemaining;
 	private $_headers;
+
 	const BASE_URL = 'http://api.sandbox.dnsmadeeasy.com/V1.2/';
 
 	public function __construct($apiKey, $secretKey, $testing = FALSE)
@@ -29,42 +30,22 @@ class DnsMadeEasy
 		$this->_headers = array();
 	}
 
-	public function getDomains()
+	public function listDomains()
 	{
-		$ch = curl_init();
-
-		if (empty($ch)) {
-			throw new DnsMadeEasyException('Unable to initialize a new cURL session.');
-		}
-
-		$requestDate = date('r');
-		$headers = array(
-			"x-dnsme-apiKey: $this->_apiKey",
-			"x-dnsme-requestDate: $requestDate",
-			'x-dnsme-hmac: ' . $this->_hmac($requestDate),
-		);
-
-		curl_setopt($ch, CURLOPT_URL, 'http://api.sandbox.dnsmadeeasy.com/V1.2/domains');
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-		curl_setopt($ch, CURLOPT_HEADERFUNCTION, array($this, '_curlHeaderCallback'));
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-		$output = curl_exec($ch);
-
-		if (($errno = curl_errno($ch)) > 0)
+		try
 		{
-		    throw new DnsMadeEasyException(curl_error($ch), $errno);
+			$domains = $this->_curl('domains');
+		}
+		catch (Exception $e)
+		{
+			throw new DnsMadeEasyException('Unable to retrieve domain listing.', $e);
 		}
 
-		$httpResponseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-		if ($httpResponseCode != 200) {
-			throw new DnsMadeEasyException('Invalid HTTP response code.', $httpResponseCode);
+		if (!$this->getRequestId()) {
+ 			throw new DnsMadeEasyException('Unable to retrieve domain listing. No request ID found.');
 		}
 
-		curl_close($ch);
-
-		$domains = json_decode($output, TRUE);
+		$domains = json_decode($domains, TRUE);
 
 		if (!empty($domains['list'])) {
 			$domains = $domains['list'];
@@ -73,19 +54,33 @@ class DnsMadeEasy
 		return $domains;
 	}
 
+	public function deleteAllDomains()
+	{
+		try
+		{
+			$domains = $this->_curl('domains', DnsMadeEasyMethods::DELETE);
+		}
+		catch (Exception $e)
+		{
+			throw new DnsMadeEasyException('Unable to delete all domains.', $e);
+		}
+
+		return $this->getRequestId() ? TRUE : FALSE;
+	}
+
 	public function getRequestLimit()
 	{
-		return (int) $this->_headers['x-dnsme-requestLimit'];
+		return empty($this->_headers['x-dnsme-requestLimit']) ? FALSE : (int) $this->_headers['x-dnsme-requestLimit'];
 	}
 
 	public function getRequestsRemaining()
 	{
-		return (int) $this->_headers['x-dnsme-requestsRemaining'];
+		return empty($this->_headers['x-dnsme-requestsRemaining']) ? FALSE : (int) $this->_headers['x-dnsme-requestsRemaining'];
 	}
 
 	public function getRequestId()
 	{
-		return $this->_headers['x-dnsme-requestId'];
+		return empty($this->_headers['x-dnsme-requestId']) ? FALSE : $this->_headers['x-dnsme-requestId'];
 	}
 
 	private function _hmac($requestDate)
@@ -116,5 +111,56 @@ class DnsMadeEasy
 		return $length;
 
 	}
+
+	private function _curl($operation, $method = DnsMadeEasyMethods::GET)
+	{
+		if (empty($operation)) {
+			throw new DnsMadeEasyException('The operation is required.');
+		}
+
+		$ch = curl_init();
+
+		if (empty($ch)) {
+			throw new DnsMadeEasyException('Unable to initialize a new cURL session.');
+		}
+
+		$requestDate = date('r');
+
+		curl_setopt($ch, CURLOPT_URL, self::BASE_URL . 'domains');
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_HEADERFUNCTION, array($this, '_curlHeaderCallback'));
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			"x-dnsme-apiKey: $this->_apiKey",
+			"x-dnsme-requestDate: $requestDate",
+			'x-dnsme-hmac: ' . $this->_hmac($requestDate),
+		));
+
+		$this->_headers = array();
+
+		$output = curl_exec($ch);
+
+		if (($errno = curl_errno($ch)) > 0)
+		{
+		    throw new DnsMadeEasyException(curl_error($ch), $errno);
+		}
+
+		$httpResponseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+		if ($httpResponseCode != 200) {
+			throw new DnsMadeEasyException('Invalid HTTP response code.', $httpResponseCode);
+		}
+
+		curl_close($ch);
+
+		return $output;
+	}
+}
+
+class DnsMadeEasyMethods
+{
+	const GET    = 'GET';
+	const DELETE = 'DELETE';
+	const PUT    = 'PUT';
 }
 ?>
