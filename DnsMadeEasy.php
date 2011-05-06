@@ -1,35 +1,9 @@
 <?php
-require_once 'DnsMadeEasyException.php';
+require_once 'DnsMadeEasyBase.php';
+require_once 'DnsMadeEasyDomain.php';
 
-class DnsMadeEasy
+class DnsMadeEasy extends DnsMadeEasyBase
 {
-	private $_apiKey;
-	private $_secretKey;
-	private $_testing;
-	private $_requestLimit;
-	private $_requestsRemaining;
-	private $_headers;
-
-	const BASE_URL = 'http://api.sandbox.dnsmadeeasy.com/V1.2/';
-
-	public function __construct($apiKey, $secretKey, $testing = FALSE)
-	{
-		if (empty($apiKey)) {
-			throw new DnsMadeEasyException('The API key is required.');
-		}
-
-		if (empty($secretKey)) {
-			throw new DnsMadeEasyException('The Secret Key is required.');
-		}
-
-		date_default_timezone_set('UTC');
-
-		$this->_apiKey = $apiKey;
-		$this->_secretKey = $secretKey;
-		$this->_testing = $testing;
-		$this->_headers = array();
-	}
-
 	public function listDomains()
 	{
 		try
@@ -38,7 +12,7 @@ class DnsMadeEasy
 		}
 		catch (Exception $e)
 		{
-			throw new DnsMadeEasyException('Unable to retrieve domain listing.', $e);
+			throw new DnsMadeEasyException('Unable to retrieve domain listing.', NULL, $e);
 		}
 
 		if (!$this->getRequestId()) {
@@ -58,109 +32,68 @@ class DnsMadeEasy
 	{
 		try
 		{
-			$domains = $this->_curl('domains', DnsMadeEasyMethods::DELETE);
+			$this->_curl('domains', DnsMadeEasyMethod::DELETE);
 		}
 		catch (Exception $e)
 		{
-			throw new DnsMadeEasyException('Unable to delete all domains.', $e);
+			throw new DnsMadeEasyException('Unable to delete all domains.', NULL, $e);
 		}
 
 		return $this->getRequestId() ? TRUE : FALSE;
 	}
 
-	public function getRequestLimit()
+	public function getDomain($domain)
 	{
-		return empty($this->_headers['x-dnsme-requestLimit']) ? FALSE : (int) $this->_headers['x-dnsme-requestLimit'];
-	}
-
-	public function getRequestsRemaining()
-	{
-		return empty($this->_headers['x-dnsme-requestsRemaining']) ? FALSE : (int) $this->_headers['x-dnsme-requestsRemaining'];
-	}
-
-	public function getRequestId()
-	{
-		return empty($this->_headers['x-dnsme-requestId']) ? FALSE : $this->_headers['x-dnsme-requestId'];
-	}
-
-	private function _hmac($requestDate)
-	{
-		if (empty($requestDate)) {
-			throw new DnsMadeEasyException('The request date is required.');
+		if (empty($domain)) {
+			throw new DnsMadeEasyException('The domain is required.');
 		}
 
-		return hash_hmac('sha1', $requestDate, $this->_secretKey);
-	}
-
-	private function _curlHeaderCallback($ch, $header)
-	{
-		$length = strlen($header);
-
-		if (empty($header)) {
-			return $length;
-		}
-
-		$split = explode(':', $header);
-
-		if (count($split) < 2) {
-			return $length;
-		}
-
-		$this->_headers[$split[0]] = trim($split[1]);
-
-		return $length;
-
-	}
-
-	private function _curl($operation, $method = DnsMadeEasyMethods::GET)
-	{
-		if (empty($operation)) {
-			throw new DnsMadeEasyException('The operation is required.');
-		}
-
-		$ch = curl_init();
-
-		if (empty($ch)) {
-			throw new DnsMadeEasyException('Unable to initialize a new cURL session.');
-		}
-
-		$requestDate = date('r');
-
-		curl_setopt($ch, CURLOPT_URL, self::BASE_URL . 'domains');
-		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-		curl_setopt($ch, CURLOPT_HEADERFUNCTION, array($this, '_curlHeaderCallback'));
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-			"x-dnsme-apiKey: $this->_apiKey",
-			"x-dnsme-requestDate: $requestDate",
-			'x-dnsme-hmac: ' . $this->_hmac($requestDate),
-		));
-
-		$this->_headers = array();
-
-		$output = curl_exec($ch);
-
-		if (($errno = curl_errno($ch)) > 0)
+		try
 		{
-		    throw new DnsMadeEasyException(curl_error($ch), $errno);
+			$info = $this->_curl("domains/$domain");
+		}
+		catch (Exception $e)
+		{
+			throw new DnsMadeEasyException("Unable to retrieve domain info for: $domain.", NULL, $e);
 		}
 
-		$httpResponseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-		if ($httpResponseCode != 200) {
-			throw new DnsMadeEasyException('Invalid HTTP response code.', $httpResponseCode);
-		}
-
-		curl_close($ch);
-
-		return $output;
+		return new DnsMadeEasyDomain(json_decode($info, TRUE));
 	}
-}
 
-class DnsMadeEasyMethods
-{
-	const GET    = 'GET';
-	const DELETE = 'DELETE';
-	const PUT    = 'PUT';
+	public function deleteDomain($domain)
+	{
+		if (empty($domain)) {
+			throw new DnsMadeEasyException('The domain is required.');
+		}
+
+		try
+		{
+			$this->_curl("domains/$domain", DnsMadeEasyMethod::DELETE);
+		}
+		catch (Exception $e)
+		{
+			throw new DnsMadeEasyException("Unable to delete domain: $domain.", NULL, $e);
+		}
+
+		return $this->getRequestId() ? TRUE : FALSE;
+	}
+
+	public function addDomain($domain)
+	{
+		if (empty($domain)) {
+			throw new DnsMadeEasyException('The domain is required.');
+		}
+
+		try
+		{
+			$output = $this->_curl("domains/$domain", DnsMadeEasyMethod::PUT);
+		}
+		catch (Exception $e)
+		{
+			throw new DnsMadeEasyException("Unable to add domain: $domain.", NULL, $e);
+		}
+
+		return new DnsMadeEasyDomain(json_decode($output, TRUE));
+	}
 }
 ?>
