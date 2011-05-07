@@ -1,5 +1,5 @@
 <?php
-class DnsMadeEasyMxRecord extends DnsMadeEasyRecordBase
+class DnsMadeEasyMxRecord extends DnsMadeEasyRecord
 {
 	protected $_priority;
 	protected $_targetName;

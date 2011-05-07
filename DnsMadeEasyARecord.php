@@ -1,5 +1,5 @@
 <?php
-class DnsMadeEasyARecord extends DnsMadeEasyRecordBase
+class DnsMadeEasyARecord extends DnsMadeEasyRecord
 {
 	protected $_password;
 

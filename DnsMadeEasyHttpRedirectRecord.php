@@ -1,5 +1,5 @@
 <?php
-class DnsMadeEasyHttpRedirectRecord extends DnsMadeEasyRecordBase
+class DnsMadeEasyHttpRedirectRecord extends DnsMadeEasyRecord
 {
 	protected $_description;
 	protected $_keywords;
