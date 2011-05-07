@@ -137,17 +137,13 @@ class DnsMadeEasyBase
 
 	protected function _setErrors($apiResponse, $httpErrorStatusCode = 404)
 	{
-		if (empty($apiResponse) || empty($httpErrorStatusCode)) {
-			return;
-		}
-
 		$errors = json_decode($apiResponse, TRUE);
 
 		if ($this->_httpStatusCode == $httpErrorStatusCode && !empty($errors) && isset($errors['error'])) {
 			$this->_errors = $errors['error'];
 		}
 		else {
-			$this->_errors = array($apiResponse);
+			$this->_errors = array("HTTP Status Code: $httpErrorStatusCode, API Response: $apiResponse");
 		}
 	}
 }

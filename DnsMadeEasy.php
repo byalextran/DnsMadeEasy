@@ -26,7 +26,7 @@ class DnsMadeEasy extends DnsMadeEasyBase
 			return $domains;
 		}
 
-		$this->_errors = array($apiResponse);
+		$this->_setErrors($apiResponse);
 
 		return FALSE;
 	}
@@ -44,7 +44,7 @@ class DnsMadeEasy extends DnsMadeEasyBase
 			return TRUE;
 		}
 
-		$this->_errors = array($apiResponse);
+		$this->_setErrors($apiResponse);
 
 		return FALSE;
 	}
@@ -63,7 +63,7 @@ class DnsMadeEasy extends DnsMadeEasyBase
 		}
 
 		if ($this->_httpStatusCode == 200) {
-			return new DnsMadeEasyDomain(json_decode($info, TRUE));
+			return new DnsMadeEasyDomain(json_decode($apiResponse, TRUE));
 		}
 
 		$this->_setErrors($apiResponse);
