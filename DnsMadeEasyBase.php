@@ -71,7 +71,7 @@ class DnsMadeEasyBase
 
 	}
 
-	protected function _curl($operation, $method = DnsMadeEasyMethod::GET)
+	protected function _curl($operation, $method = DnsMadeEasyMethod::GET, $post = NULL)
 	{
 		if (empty($operation)) {
 			throw new DnsMadeEasyException('The operation is required.');
@@ -95,6 +95,10 @@ class DnsMadeEasyBase
 			"x-dnsme-requestDate: $requestDate",
 			'x-dnsme-hmac: ' . $this->_hmac($requestDate),
 		));
+
+		if ($method == DnsMadeEasyMethod::POST && !empty($post)) {
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+		}
 
 		$this->_resetApiCallValues();
 
@@ -136,5 +140,6 @@ class DnsMadeEasyMethod
 	const GET    = 'GET';
 	const DELETE = 'DELETE';
 	const PUT    = 'PUT';
+	const POST    = 'POST';
 }
 ?>

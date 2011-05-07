@@ -24,14 +24,24 @@ class DnsMadeEasyRecord
 
 	public function id() { return $this->_id; }
 
-	public function name() { return $this->_name; }
+	public function getName() { return $this->_name; }
 
-	public function type() { return $this->_type; }
+	public function setName($name) { $this->_name = $name; }
 
-	public function data() { return $this->_data; }
+	public function getType() { return $this->_type; }
 
-	public function ttl() { return $this->_ttl; }
+	public function setType($type) { $this->_type = $type; }
 
-	public function gtdLocation() { return $this->_gtdLocation; }
+	public function getData() { return $this->_data; }
+
+	public function setData($data) { $this->_data = $data; }
+
+	public function getTtl() { return $this->_ttl; }
+
+	public function setTtl($ttl) { $this->_ttl = $ttl; }
+
+	public function getGtdLocation() { return $this->_gtdLocation; }
+
+	public function setGtdLocation($gtdLocation) { $this->_gtdLocation = $gtdLocation; }
 }
 ?>

@@ -121,14 +121,24 @@ class DnsMadeEasy extends DnsMadeEasyBase
 		return FALSE;
 	}
 
-	public function getDnsRecords($domain)
+	public function getDnsRecords($domain, $type = NULL, $gtdLocation = NULL)
 	{
 		if (empty($domain)) {
 			throw new DnsMadeEasyException('The domain is required.');
 		}
 
+		$url = "domains/$domain/records?";
+
+		if (!empty($type)) {
+			$url .= "type=$type&";
+		}
+
+		if (!empty($gtdLocation)) {
+			$url .= "gtdLocation=$gtdLocation&";
+		}
+
 		try {
-			$apiResponse = $this->_curl("domains/$domain/records");
+			$apiResponse = $this->_curl($url);
 		}
 		catch (Exception $e) {
 			throw new DnsMadeEasyException("Unable to retrieve DNS records for: $domain.", NULL, $e);
@@ -141,6 +151,32 @@ class DnsMadeEasy extends DnsMadeEasyBase
 		}
 
 		$this->_setErrors($apiResponse);
+
+		return FALSE;
+	}
+
+	public function addDnsRecord($domain, $record)
+	{
+		if (empty($domain)) {
+			throw new DnsMadeEasyException('The domain is required.');
+		}
+
+		if (empty($record)) {
+			throw new DnsMadeEasyException('The record is required.');
+		}
+
+		try {
+			$apiResponse = $this->_curl('domains/$domain/records', DnsMadeEasyMethod::POST, $record);
+		}
+		catch (Exception $e) {
+			throw new DnsMadeEasyException(sprintf('Unable to add DNS record: %s (%s)', print_r($record, TRUE), $domain), NULL, $e);
+		}
+
+		if ($this->_httpStatusCode == 201) {
+			return $this->requestId();
+		}
+
+		$this->_setErrors($apiResponse, 400);
 
 		return FALSE;
 	}
