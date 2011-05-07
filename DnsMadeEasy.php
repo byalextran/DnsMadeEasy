@@ -6,21 +6,15 @@ class DnsMadeEasy extends DnsMadeEasyBase
 {
 	public function getDomains()
 	{
-		try
-		{
+		try {
 			$output = $this->_curl('domains');
 		}
-		catch (Exception $e)
-		{
+		catch (Exception $e) {
 			throw new DnsMadeEasyException('Unable to retrieve domain listing.', NULL, $e);
 		}
 
-
-
 		if ($this->_httpResponseCode == 200) {
 			$domains = json_decode($output, TRUE);
-
-			die(print_r($domains, true));
 
 			if (!empty($domains) && isset($domains['list'])) {
 				$domains = $domains['list'];
@@ -39,12 +33,10 @@ class DnsMadeEasy extends DnsMadeEasyBase
 
 	public function deleteAllDomains()
 	{
-		try
-		{
+		try {
 			$output = $this->_curl('domains', DnsMadeEasyMethod::DELETE);
 		}
-		catch (Exception $e)
-		{
+		catch (Exception $e) {
 			throw new DnsMadeEasyException('Unable to delete all domains.', NULL, $e);
 		}
 
@@ -63,12 +55,10 @@ class DnsMadeEasy extends DnsMadeEasyBase
 			throw new DnsMadeEasyException('The domain is required.');
 		}
 
-		try
-		{
+		try {
 			$output = $this->_curl("domains/$domain");
 		}
-		catch (Exception $e)
-		{
+		catch (Exception $e) {
 			throw new DnsMadeEasyException("Unable to retrieve domain info for: $domain.", NULL, $e);
 		}
 
@@ -87,12 +77,10 @@ class DnsMadeEasy extends DnsMadeEasyBase
 			throw new DnsMadeEasyException('The domain is required.');
 		}
 
-		try
-		{
+		try {
 			$output = $this->_curl("domains/$domain", DnsMadeEasyMethod::DELETE);
 		}
-		catch (Exception $e)
-		{
+		catch (Exception $e) {
 			throw new DnsMadeEasyException("Unable to delete domain: $domain.", NULL, $e);
 		}
 
@@ -116,12 +104,10 @@ class DnsMadeEasy extends DnsMadeEasyBase
 			throw new DnsMadeEasyException('The domain is required.');
 		}
 
-		try
-		{
+		try {
 			$output = $this->_curl("domains/$domain", DnsMadeEasyMethod::PUT);
 		}
-		catch (Exception $e)
-		{
+		catch (Exception $e) {
 			throw new DnsMadeEasyException("Unable to add domain: $domain.", NULL, $e);
 		}
 

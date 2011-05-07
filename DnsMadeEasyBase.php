@@ -146,8 +146,7 @@ class DnsMadeEasyBase
 		if ($this->_httpResponseCode == $httpErrorResponseCode && !empty($errors) && isset($errors['error'])) {
 			$this->_errors = $errors['error'];
 		}
-		else
-		{
+		else {
 			$this->_errors = array($apiResponse);
 		}
 	}
