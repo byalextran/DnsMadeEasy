@@ -135,37 +135,7 @@ class DnsMadeEasy extends DnsMadeEasyBase
 		}
 
 		if ($this->_httpStatusCode == 200) {
-			$temp = json_decode($apiResponse, TRUE);
-
-			$records = array();
-			if (!empty($temp)) {
-				foreach($temp as $record) {
-					switch($record['type']) {
-						case 'A':
-							$records[] = new DnsMadeEasyARecord($record);
-						break;
-
-						case 'AAAA':
-							$records[] = new DnsMadeEasyARecord($record);
-						break;
-
-						case 'CNAME':
-							$records[] = new DnsMadeEasyCnameRecord($record);
-						break;
-
-						case 'HTTPRED':
-							$records[] = new DnsMadeEasyHttpRedirectRecord($record);
-						break;
-
-						case 'MX':
-							$records[] = new DnsMadeEasyMxRecord($record);
-						break;
-
-						default:
-							$records[] = new DnsMadeEasyRecordBase($record);
-					}
-				}
-			}
+			$records = $this->_getRecords(json_decode($apiResponse, TRUE));
 
 			return $records;
 		}
@@ -173,6 +143,45 @@ class DnsMadeEasy extends DnsMadeEasyBase
 		$this->_setErrors($apiResponse);
 
 		return FALSE;
+	}
+
+	private function _getRecords($recordsArray)
+	{
+		if (empty($recordsArray)) {
+			return array();
+		}
+
+		$records = array();
+
+		foreach($recordsArray as $record) {
+			// TODO: i know there's a design pattern meant to address this...
+			switch($record['type']) {
+				case 'A':
+					$records[] = new DnsMadeEasyARecord($record);
+				break;
+
+				case 'AAAA':
+					$records[] = new DnsMadeEasyARecord($record);
+				break;
+
+				case 'HTTPRED':
+					$records[] = new DnsMadeEasyHttpRedirectRecord($record);
+				break;
+
+				case 'MX':
+					$records[] = new DnsMadeEasyMxRecord($record);
+				break;
+
+				case 'SRV':
+					$records[] = new DnsMadeEasySrvRecord($record);
+				break;
+
+				default:
+					$records[] = new DnsMadeEasyRecord($record);
+			}
+		}
+
+		return $records;
 	}
 }
 ?>

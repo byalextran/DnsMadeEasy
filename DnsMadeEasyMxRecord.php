@@ -8,10 +8,8 @@ class DnsMadeEasyMxRecord extends DnsMadeEasyRecord
 	{
 		parent::__construct($record);
 
-		$this->_priority = -1;
+		$this->_priority = '';
 		$this->_targetName = '';
-
-		echo $record;
 
 		if (preg_match('/(?<priority>\d+)\s*(?<targetName>.+)/', $this->_data, $matches) > 0) {
 			$this->_priority = (int) $matches['priority'];
