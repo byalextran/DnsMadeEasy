@@ -9,7 +9,7 @@ class DnsMadeEasyBase
 	protected $_requestLimit;
 	protected $_requestsRemaining;
 	protected $_headers;
-	protected $_httpResponseCode;
+	protected $_httpStatusCode;
 	protected $_errors;
 
 	const BASE_URL = 'http://api.dnsmadeeasy.com/V1.2/';
@@ -34,9 +34,9 @@ class DnsMadeEasyBase
 		$this->_errors = array();
 	}
 
-	public function httpResponseCode()
+	public function httpStatusCode()
 	{
-		return $this->_httpResponseCode;
+		return $this->_httpStatusCode;
 	}
 
 	public function requestLimit()
@@ -115,35 +115,35 @@ class DnsMadeEasyBase
 
 		$this->_resetApiCallValues();
 
-		$output = curl_exec($ch);
+		$apiResponse = curl_exec($ch);
 
 		if (($errno = curl_errno($ch)) > 0) {
 		    throw new DnsMadeEasyException(curl_error($ch), $errno);
 		}
 
-		$this->_httpResponseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$this->_httpStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
 		curl_close($ch);
 
-		return $output;
+		return $apiResponse;
 	}
 
 	protected function _resetApiCallValues()
 	{
 		$this->_headers = array();
-		$this->_httpResponseCode = -1;
+		$this->_httpStatusCode = -1;
 		$this->_errors = array();
 	}
 
-	protected function _setErrors($apiResponse, $httpErrorResponseCode = 404)
+	protected function _setErrors($apiResponse, $httpErrorStatusCode = 404)
 	{
-		if (empty($apiResponse) || empty($httpErrorResponseCode)) {
+		if (empty($apiResponse) || empty($httpErrorStatusCode)) {
 			return;
 		}
 
 		$errors = json_decode($apiResponse, TRUE);
 
-		if ($this->_httpResponseCode == $httpErrorResponseCode && !empty($errors) && isset($errors['error'])) {
+		if ($this->_httpStatusCode == $httpErrorStatusCode && !empty($errors) && isset($errors['error'])) {
 			$this->_errors = $errors['error'];
 		}
 		else {
