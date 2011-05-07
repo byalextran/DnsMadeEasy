@@ -16,19 +16,10 @@ class DnsMadeEasyDomain
 		$this->_gtdEnabled = empty($domain['gtdEnabled']) ? FALSE : (bool) $domain['gtdEnabled'];
 	}
 
-	public function getName()
-	{
-		return $this->_name;
-	}
+	public function name() { return $this->_name; }
 
-	public function getNameServers()
-	{
-		return $this->_nameServers;
-	}
+	public function nameServers() { return $this->_nameServers; }
 
-	public function gtdEnabled()
-	{
-		return $this->_gtdEnabled;
-	}
+	public function gtdEnabled() { return $this->_gtdEnabled; }
 }
 ?>

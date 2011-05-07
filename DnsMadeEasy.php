@@ -1,6 +1,7 @@
 <?php
-require_once 'DnsMadeEasyBase.php';
-require_once 'DnsMadeEasyDomain.php';
+function __autoload($class) {
+    require_once $class . '.php';
+}
 
 class DnsMadeEasy extends DnsMadeEasyBase
 {
@@ -116,6 +117,60 @@ class DnsMadeEasy extends DnsMadeEasyBase
 		}
 
 		$this->_setErrors($apiResponse, 400);
+
+		return FALSE;
+	}
+
+	public function getDnsRecords($domain)
+	{
+		if (empty($domain)) {
+			throw new DnsMadeEasyException('The domain is required.');
+		}
+
+		try {
+			$apiResponse = $this->_curl("domains/$domain/records");
+		}
+		catch (Exception $e) {
+			throw new DnsMadeEasyException("Unable to retrieve DNS records for: $domain.", NULL, $e);
+		}
+
+		if ($this->_httpStatusCode == 200) {
+			$temp = json_decode($apiResponse, TRUE);
+
+			$records = array();
+			if (!empty($temp)) {
+				foreach($temp as $record) {
+					switch($record['type']) {
+						case 'A':
+							$records[] = new DnsMadeEasyARecord($record);
+						break;
+
+						case 'AAAA':
+							$records[] = new DnsMadeEasyARecord($record);
+						break;
+
+						case 'CNAME':
+							$records[] = new DnsMadeEasyCnameRecord($record);
+						break;
+
+						case 'HTTPRED':
+							$records[] = new DnsMadeEasyHttpRedirectRecord($record);
+						break;
+
+						case 'MX':
+							$records[] = new DnsMadeEasyMxRecord($record);
+						break;
+
+						default:
+							$records[] = new DnsMadeEasyRecordBase($record);
+					}
+				}
+			}
+
+			return $records;
+		}
+
+		$this->_setErrors($apiResponse);
 
 		return FALSE;
 	}

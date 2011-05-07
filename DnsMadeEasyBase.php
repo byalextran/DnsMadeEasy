@@ -1,6 +1,4 @@
 <?php
-require_once 'DnsMadeEasyException.php';
-
 class DnsMadeEasyBase
 {
 	protected $_apiKey;
@@ -34,30 +32,15 @@ class DnsMadeEasyBase
 		$this->_errors = array();
 	}
 
-	public function httpStatusCode()
-	{
-		return $this->_httpStatusCode;
-	}
+	public function httpStatusCode() { return $this->_httpStatusCode; }
 
-	public function requestLimit()
-	{
-		return empty($this->_headers['x-dnsme-requestLimit']) ? FALSE : (int) $this->_headers['x-dnsme-requestLimit'];
-	}
+	public function requestLimit() { return empty($this->_headers['x-dnsme-requestLimit']) ? FALSE : (int) $this->_headers['x-dnsme-requestLimit']; }
 
-	public function requestsRemaining()
-	{
-		return empty($this->_headers['x-dnsme-requestsRemaining']) ? FALSE : (int) $this->_headers['x-dnsme-requestsRemaining'];
-	}
+	public function requestsRemaining() { return empty($this->_headers['x-dnsme-requestsRemaining']) ? FALSE : (int) $this->_headers['x-dnsme-requestsRemaining']; }
 
-	public function requestId()
-	{
-		return empty($this->_headers['x-dnsme-requestId']) ? FALSE : $this->_headers['x-dnsme-requestId'];
-	}
+	public function requestId() { return empty($this->_headers['x-dnsme-requestId']) ? FALSE : $this->_headers['x-dnsme-requestId']; }
 
-	public function errors()
-	{
-		return $this->_errors;
-	}
+	public function errors() { return $this->_errors; }
 
 	protected function _hmac($requestDate)
 	{
