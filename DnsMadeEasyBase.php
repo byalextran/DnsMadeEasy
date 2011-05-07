@@ -10,6 +10,7 @@ class DnsMadeEasyBase
 	protected $_requestsRemaining;
 	protected $_headers;
 	protected $_httpResponseCode;
+	protected $_errors;
 
 	const BASE_URL = 'http://api.dnsmadeeasy.com/V1.2/';
 	const BASE_TEST_URL = 'http://api.sandbox.dnsmadeeasy.com/V1.2/';
@@ -30,21 +31,32 @@ class DnsMadeEasyBase
 		$this->_secretKey = $secretKey;
 		$this->_testing = $testing;
 		$this->_headers = array();
+		$this->_errors = array();
 	}
 
-	public function getRequestLimit()
+	public function httpResponseCode()
+	{
+		return $this->_httpResponseCode;
+	}
+
+	public function requestLimit()
 	{
 		return empty($this->_headers['x-dnsme-requestLimit']) ? FALSE : (int) $this->_headers['x-dnsme-requestLimit'];
 	}
 
-	public function getRequestsRemaining()
+	public function requestsRemaining()
 	{
 		return empty($this->_headers['x-dnsme-requestsRemaining']) ? FALSE : (int) $this->_headers['x-dnsme-requestsRemaining'];
 	}
 
-	public function getRequestId()
+	public function requestId()
 	{
 		return empty($this->_headers['x-dnsme-requestId']) ? FALSE : $this->_headers['x-dnsme-requestId'];
+	}
+
+	public function errors()
+	{
+		return $this->_errors;
 	}
 
 	protected function _hmac($requestDate)
@@ -101,8 +113,7 @@ class DnsMadeEasyBase
 			'x-dnsme-hmac: ' . $this->_hmac($requestDate),
 		));
 
-		$this->_headers = array();
-		$this->_httpResponseCode = -1;
+		$this->_resetApiCallValues();
 
 		$output = curl_exec($ch);
 
@@ -115,6 +126,30 @@ class DnsMadeEasyBase
 		curl_close($ch);
 
 		return $output;
+	}
+
+	protected function _resetApiCallValues()
+	{
+		$this->_headers = array();
+		$this->_httpResponseCode = -1;
+		$this->_errors = array();
+	}
+
+	protected function _setErrors($apiResponse, $httpErrorResponseCode = 404)
+	{
+		if (empty($apiResponse) || empty($httpErrorResponseCode)) {
+			return;
+		}
+
+		$errors = json_decode($apiResponse, TRUE);
+
+		if ($this->_httpResponseCode == $httpErrorResponseCode && !empty($errors) && isset($errors['error'])) {
+			$this->_errors = $errors['error'];
+		}
+		else
+		{
+			$this->_errors = array($apiResponse);
+		}
 	}
 }
 
