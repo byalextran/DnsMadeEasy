@@ -5,47 +5,22 @@ function __autoload($class) {
 
 class DnsMadeEasy extends DnsMadeEasyBase
 {
-	public function getDomains()
+	public function addDomain($domain)
 	{
+		if (empty($domain)) {
+			throw new DnsMadeEasyException('The domain is required.');
+		}
+
 		try {
-			$apiResponse = $this->_curl('domains');
+			$apiResponse = $this->_curl("domains/$domain", 201, 400, DnsMadeEasyMethod::PUT);
 		}
 		catch (Exception $e) {
-			throw new DnsMadeEasyException('Unable to retrieve domain listing.', NULL, $e);
+			throw new DnsMadeEasyException("Unable to add domain: $domain.", NULL, $e);
 		}
 
-		if ($this->_httpStatusCode == 200) {
-			$domains = json_decode($apiResponse, TRUE);
-
-			if (!empty($domains) && isset($domains['list'])) {
-				$domains = $domains['list'];
-			}
-			else {
-				$domains = array($apiResponse);
-			}
-
-			return $domains;
+		if ($apiResponse) {
+			return new DnsMadeEasyDomain(json_decode($apiResponse, TRUE));
 		}
-
-		$this->_setErrors($apiResponse);
-
-		return FALSE;
-	}
-
-	public function deleteAllDomains()
-	{
-		try {
-			$apiResponse = $this->_curl('domains', DnsMadeEasyMethod::DELETE);
-		}
-		catch (Exception $e) {
-			throw new DnsMadeEasyException('Unable to delete all domains.', NULL, $e);
-		}
-
-		if ($this->_httpStatusCode == 200) {
-			return TRUE;
-		}
-
-		$this->_setErrors($apiResponse);
 
 		return FALSE;
 	}
@@ -63,11 +38,34 @@ class DnsMadeEasy extends DnsMadeEasyBase
 			throw new DnsMadeEasyException("Unable to retrieve domain info for: $domain.", NULL, $e);
 		}
 
-		if ($this->_httpStatusCode == 200) {
+		if ($apiResponse) {
 			return new DnsMadeEasyDomain(json_decode($apiResponse, TRUE));
 		}
 
-		$this->_setErrors($apiResponse);
+		return FALSE;
+	}
+
+	public function getDomains()
+	{
+		try {
+			$apiResponse = $this->_curl('domains');
+		}
+		catch (Exception $e) {
+			throw new DnsMadeEasyException('Unable to retrieve domain listing.', NULL, $e);
+		}
+
+		if ($apiResponse) {
+			$domains = json_decode($apiResponse, TRUE);
+
+			if (!empty($domains) && isset($domains['list'])) {
+				$domains = $domains['list'];
+			}
+			else {
+				$domains = array($apiResponse);
+			}
+
+			return $domains;
+		}
 
 		return FALSE;
 	}
@@ -79,44 +77,75 @@ class DnsMadeEasy extends DnsMadeEasyBase
 		}
 
 		try {
-			$apiResponse = $this->_curl("domains/$domain", DnsMadeEasyMethod::DELETE);
+			$apiResponse = $this->_curl("domains/$domain", 200, 404, DnsMadeEasyMethod::DELETE);
 		}
 		catch (Exception $e) {
 			throw new DnsMadeEasyException("Unable to delete domain: $domain.", NULL, $e);
 		}
 
-		if ($this->_httpStatusCode == 200) {
-			return TRUE;
+		return $this->_httpStatusCode == 200;
+	}
+
+	public function deleteAllDomains()
+	{
+		try {
+			$apiResponse = $this->_curl('domains', DnsMadeEasyMethod::DELETE);
+		}
+		catch (Exception $e) {
+			throw new DnsMadeEasyException('Unable to delete all domains.', NULL, $e);
 		}
 
-		$this->_setErrors($apiResponse);
+		return $this->_httpStatusCode == 200;
+	}
 
-		// API doesn't return an error message if domain doesn't exist, so manually add one.
-		if ($this->_httpStatusCode == 404) {
-			$this->_errors = array("Unable to delete domain: $domain. Domain not found.");
+	public function addDnsRecord($domain, $record)
+	{
+		// TODO: get working
+		if (empty($domain)) {
+			throw new DnsMadeEasyException('The domain is required.');
 		}
+
+		if (empty($record)) {
+			throw new DnsMadeEasyException('The record is required.');
+		}
+
+		try {
+			$apiResponse = $this->_curl('domains/$domain/records', DnsMadeEasyMethod::POST, $record);
+		}
+		catch (Exception $e) {
+			throw new DnsMadeEasyException(sprintf('Unable to add DNS record: %s (%s)', print_r($record, TRUE), $domain), NULL, $e);
+		}
+
+		if ($this->_httpStatusCode == 201) {
+			return $this->requestId();
+		}
+
+		$this->_setErrors($apiResponse, 400);
 
 		return FALSE;
 	}
 
-	public function addDomain($domain)
+
+	public function getDnsRecord($domain, $recordId)
 	{
 		if (empty($domain)) {
 			throw new DnsMadeEasyException('The domain is required.');
 		}
 
+		if (empty($recordId)) {
+			throw new DnsMadeEasyException('The record ID is required.');
+		}
+
 		try {
-			$apiResponse = $this->_curl("domains/$domain", DnsMadeEasyMethod::PUT);
+			$apiResponse = $this->_curl("domains/$domain/records/$recordId");
 		}
 		catch (Exception $e) {
-			throw new DnsMadeEasyException("Unable to add domain: $domain.", NULL, $e);
+			throw new DnsMadeEasyException("Unable to retrieve DNS record: $recordId ($domain).", NULL, $e);
 		}
 
-		if ($this->_httpStatusCode == 201) {
-			return new DnsMadeEasyDomain(json_decode($apiResponse, TRUE));
+		if ($apiResponse) {
+			return DnsMadeEasyBase::_getDnsRecord(json_decode($apiResponse, TRUE));
 		}
-
-		$this->_setErrors($apiResponse, 400);
 
 		return FALSE;
 	}
@@ -144,44 +173,51 @@ class DnsMadeEasy extends DnsMadeEasyBase
 			throw new DnsMadeEasyException("Unable to retrieve DNS records for: $domain.", NULL, $e);
 		}
 
-		if ($this->_httpStatusCode == 200) {
-			$records = $this->_getRecords(json_decode($apiResponse, TRUE));
-
-			return $records;
+		if ($apiResponse) {
+			return DnsMadeEasy::_getRecords(json_decode($apiResponse, TRUE));
 		}
-
-		$this->_setErrors($apiResponse);
 
 		return FALSE;
 	}
 
-	public function addDnsRecord($domain, $record)
+	public function getSecondary()
 	{
-		if (empty($domain)) {
-			throw new DnsMadeEasyException('The domain is required.');
-		}
-
-		if (empty($record)) {
-			throw new DnsMadeEasyException('The record is required.');
-		}
-
 		try {
-			$apiResponse = $this->_curl('domains/$domain/records', DnsMadeEasyMethod::POST, $record);
+			$apiResponse = $this->_curl("secondary");
 		}
 		catch (Exception $e) {
-			throw new DnsMadeEasyException(sprintf('Unable to add DNS record: %s (%s)', print_r($record, TRUE), $domain), NULL, $e);
+			throw new DnsMadeEasyException("Unable to retrieve secondary entries.", NULL, $e);
 		}
 
-		if ($this->_httpStatusCode == 201) {
-			return $this->requestId();
-		}
+		if ($apiResponse) {
+			$secondary = json_decode($apiResponse, TRUE);
 
-		$this->_setErrors($apiResponse, 400);
+			if (!empty($secondary) && isset($secondary['list'])) {
+				$secondary = $secondary['list'];
+			}
+			else {
+				$secondary = array($apiResponse);
+			}
+
+			return $secondary;
+		}
 
 		return FALSE;
 	}
 
-	private function _getRecords($recordsArray)
+	public function deleteAllSecondary()
+	{
+		try {
+			$apiResponse = $this->_curl('secondary', 200, 404, DnsMadeEasyMethod::DELETE);
+		}
+		catch (Exception $e) {
+			throw new DnsMadeEasyException('Unable to delete all secondary entries.', NULL, $e);
+		}
+
+		return $this->_httpStatusCode == 200;
+	}
+
+	protected static function _getRecords($recordsArray)
 	{
 		if (empty($recordsArray)) {
 			return array();
@@ -191,30 +227,7 @@ class DnsMadeEasy extends DnsMadeEasyBase
 
 		foreach($recordsArray as $record) {
 			// TODO: i know there's a design pattern meant to address this...
-			switch($record['type']) {
-				case 'A':
-					$records[] = new DnsMadeEasyARecord($record);
-				break;
-
-				case 'AAAA':
-					$records[] = new DnsMadeEasyARecord($record);
-				break;
-
-				case 'HTTPRED':
-					$records[] = new DnsMadeEasyHttpRedirectRecord($record);
-				break;
-
-				case 'MX':
-					$records[] = new DnsMadeEasyMxRecord($record);
-				break;
-
-				case 'SRV':
-					$records[] = new DnsMadeEasySrvRecord($record);
-				break;
-
-				default:
-					$records[] = new DnsMadeEasyRecord($record);
-			}
+			$records[] = DnsMadeEasyBase::_getDnsRecord($record);
 		}
 
 		return $records;

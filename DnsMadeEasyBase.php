@@ -71,7 +71,7 @@ class DnsMadeEasyBase
 
 	}
 
-	protected function _curl($operation, $method = DnsMadeEasyMethod::GET, $post = NULL)
+	protected function _curl($operation, $successCode = 200, $errorCode = 404, $method = DnsMadeEasyMethod::GET, $post = NULL)
 	{
 		if (empty($operation)) {
 			throw new DnsMadeEasyException('The operation is required.');
@@ -97,7 +97,9 @@ class DnsMadeEasyBase
 		));
 
 		if ($method == DnsMadeEasyMethod::POST && !empty($post)) {
-			curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+			die(http_build_query($post));
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post));
 		}
 
 		$this->_resetApiCallValues();
@@ -112,7 +114,13 @@ class DnsMadeEasyBase
 
 		curl_close($ch);
 
-		return $apiResponse;
+		if ($this->_httpStatusCode == $successCode) {
+			return $apiResponse;
+		}
+
+		$this->_setErrors($apiResponse, $errorCode);
+
+		return FALSE;
 	}
 
 	protected function _resetApiCallValues()
@@ -131,6 +139,42 @@ class DnsMadeEasyBase
 		}
 		else {
 			$this->_errors = array("HTTP Status Code: $httpErrorStatusCode, API Response: $apiResponse");
+		}
+	}
+
+	protected static function _getDnsRecord($record)
+	{
+		if (empty($record)) {
+			throw new DnsMadeEasyException('The record is required.');
+		}
+
+		if (empty($record['type'])) {
+			throw new DnsMadeEasyException('A record type is required.');
+		}
+
+		switch($record['type']) {
+			case 'A':
+				return new DnsMadeEasyARecord($record);
+			break;
+
+			case 'AAAA':
+				return new DnsMadeEasyARecord($record);
+			break;
+
+			case 'HTTPRED':
+				return new DnsMadeEasyHttpRedirectRecord($record);
+			break;
+
+			case 'MX':
+				return new DnsMadeEasyMxRecord($record);
+			break;
+
+			case 'SRV':
+				return new DnsMadeEasySrvRecord($record);
+			break;
+
+			default:
+				return new DnsMadeEasyRecord($record);
 		}
 	}
 }
