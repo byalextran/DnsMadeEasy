@@ -1,30 +1,19 @@
 <?php
-function __autoload($class) {
-    require_once $class . '.php';
-}
+require_once 'Exception.php';
+require_once 'Base.php';
+require_once 'Domains.php';
+require_once 'Response.php';
 
-class DnsMadeEasy extends DnsMadeEasyBase
+class DnsMadeEasy
 {
-	public function addDomain($domain)
+	public $domains;
+
+	public function __construct($apiKey, $secretKey)
 	{
-		if (empty($domain)) {
-			throw new DnsMadeEasyException('The domain is required.');
-		}
-
-		try {
-			$apiResponse = $this->_curl("domains/$domain", 201, 400, DnsMadeEasyMethod::PUT);
-		}
-		catch (Exception $e) {
-			throw new DnsMadeEasyException("Unable to add domain: $domain.", NULL, $e);
-		}
-
-		if ($apiResponse) {
-			return new DnsMadeEasyDomain(json_decode($apiResponse, TRUE));
-		}
-
-		return FALSE;
+		$this->domains = new DnsMadeEasy_Domains($apiKey, $secretKey);
 	}
 
+	/*
 	public function getDomain($domain)
 	{
 		if (empty($domain)) {
@@ -232,5 +221,6 @@ class DnsMadeEasy extends DnsMadeEasyBase
 
 		return $records;
 	}
+	*/
 }
 ?>

@@ -1,57 +1,66 @@
 <?php
-class DnsMadeEasyBase
+class DnsMadeEasy_Base
 {
 	protected $_apiKey;
 	protected $_secretKey;
-	protected $_testing;
-	protected $_requestLimit;
-	protected $_requestsRemaining;
 	protected $_headers;
-	protected $_httpStatusCode;
-	protected $_errors;
 
-	const BASE_URL = 'http://api.dnsmadeeasy.com/V1.2/';
-	const BASE_TEST_URL = 'http://api.sandbox.dnsmadeeasy.com/V1.2/';
+	const API_BASE_URL = 'http://api.sandbox.dnsmadeeasy.com/V1.2/';
 
-	public function __construct($apiKey, $secretKey, $testing = FALSE)
+	public function __construct($apiKey, $secretKey)
 	{
-		if (empty($apiKey)) {
-			throw new DnsMadeEasyException('The API key is required.');
-		}
-
-		if (empty($secretKey)) {
-			throw new DnsMadeEasyException('The Secret Key is required.');
-		}
-
+		// needed for date() functions
 		date_default_timezone_set('UTC');
 
 		$this->_apiKey = $apiKey;
 		$this->_secretKey = $secretKey;
-		$this->_testing = $testing;
 		$this->_headers = array();
-		$this->_errors = array();
 	}
 
-	public function httpStatusCode() { return $this->_httpStatusCode; }
-
-	public function requestLimit() { return empty($this->_headers['x-dnsme-requestLimit']) ? FALSE : (int) $this->_headers['x-dnsme-requestLimit']; }
-
-	public function requestsRemaining() { return empty($this->_headers['x-dnsme-requestsRemaining']) ? FALSE : (int) $this->_headers['x-dnsme-requestsRemaining']; }
-
-	public function requestId() { return empty($this->_headers['x-dnsme-requestId']) ? FALSE : $this->_headers['x-dnsme-requestId']; }
-
-	public function errors() { return $this->_errors; }
-
-	protected function _hmac($requestDate)
+	protected function _get($operation)
 	{
-		if (empty($requestDate)) {
-			throw new DnsMadeEasyException('The request date is required.');
+		return $this->_curl($operation);
+	}
+
+	protected function _delete($operation)
+	{
+		return $this->_curl($operation, 'DELETE');
+	}
+
+	protected function _put($operation)
+	{
+		return $this->_curl($operation, 'PUT');
+	}
+
+	private function _curl($operation, $method = 'GET')
+	{
+		$url = self::API_BASE_URL . $operation;
+
+		$ch = curl_init();
+
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_HEADERFUNCTION, array($this, '_headerCallback'));
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $this->_requestHeaders());
+
+		// reset the header values
+		$this->_headers = array();
+
+		$apiResponse = curl_exec($ch);
+
+		if (($errno = curl_errno($ch)) > 0) {
+		    throw new DnsMadeEasy_Exception(sprintf('CURL ERROR: %s - URL: %s', curl_error($ch), $url), $errno);
 		}
 
-		return hash_hmac('sha1', $requestDate, $this->_secretKey);
+		$ci = curl_getinfo($ch);
+
+		curl_close($ch);
+
+		return new DnsMadeEasy_Response($apiResponse, $ci, $this->_headers);
 	}
 
-	protected function _curlHeaderCallback($ch, $header)
+	protected function _headerCallback($ch, $header)
 	{
 		$length = strlen($header);
 
@@ -68,122 +77,22 @@ class DnsMadeEasyBase
 		$this->_headers[$split[0]] = trim($split[1]);
 
 		return $length;
-
 	}
 
-	protected function _curl($operation, $successCode = 200, $errorCode = 404, $method = DnsMadeEasyMethod::GET, $post = NULL)
+	protected function _requestHeaders()
 	{
-		if (empty($operation)) {
-			throw new DnsMadeEasyException('The operation is required.');
-		}
-
-		$ch = curl_init();
-
-		if (empty($ch)) {
-			throw new DnsMadeEasyException('Unable to initialize a new cURL session.');
-		}
-
-		$url = ($this->_testing ? self::BASE_TEST_URL : self::BASE_URL) . $operation;
 		$requestDate = date('r');
 
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-		curl_setopt($ch, CURLOPT_HEADERFUNCTION, array($this, '_curlHeaderCallback'));
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+		return array(
 			"x-dnsme-apiKey: $this->_apiKey",
 			"x-dnsme-requestDate: $requestDate",
-			'x-dnsme-hmac: ' . $this->_hmac($requestDate),
-		));
-
-		if ($method == DnsMadeEasyMethod::POST && !empty($post)) {
-			die(http_build_query($post));
-			curl_setopt($ch, CURLOPT_POST, 1);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post));
-		}
-
-		$this->_resetApiCallValues();
-
-		$apiResponse = curl_exec($ch);
-
-		if (($errno = curl_errno($ch)) > 0) {
-		    throw new DnsMadeEasyException(curl_error($ch), $errno);
-		}
-
-		$this->_httpStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-		curl_close($ch);
-
-		if ($this->_httpStatusCode == $successCode) {
-			return $apiResponse;
-		}
-
-		$this->_setErrors($apiResponse, $errorCode);
-
-		return FALSE;
+			"x-dnsme-hmac: " . $this->_hash($requestDate),
+		);
 	}
 
-	protected function _resetApiCallValues()
+	protected function _hash($requestDate)
 	{
-		$this->_headers = array();
-		$this->_httpStatusCode = -1;
-		$this->_errors = array();
+		return hash_hmac('sha1', $requestDate, $this->_secretKey);
 	}
-
-	protected function _setErrors($apiResponse, $httpErrorStatusCode = 404)
-	{
-		$errors = json_decode($apiResponse, TRUE);
-
-		if ($this->_httpStatusCode == $httpErrorStatusCode && !empty($errors) && isset($errors['error'])) {
-			$this->_errors = $errors['error'];
-		}
-		else {
-			$this->_errors = array("HTTP Status Code: $httpErrorStatusCode, API Response: $apiResponse");
-		}
-	}
-
-	protected static function _getDnsRecord($record)
-	{
-		if (empty($record)) {
-			throw new DnsMadeEasyException('The record is required.');
-		}
-
-		if (empty($record['type'])) {
-			throw new DnsMadeEasyException('A record type is required.');
-		}
-
-		switch($record['type']) {
-			case 'A':
-				return new DnsMadeEasyARecord($record);
-			break;
-
-			case 'AAAA':
-				return new DnsMadeEasyARecord($record);
-			break;
-
-			case 'HTTPRED':
-				return new DnsMadeEasyHttpRedirectRecord($record);
-			break;
-
-			case 'MX':
-				return new DnsMadeEasyMxRecord($record);
-			break;
-
-			case 'SRV':
-				return new DnsMadeEasySrvRecord($record);
-			break;
-
-			default:
-				return new DnsMadeEasyRecord($record);
-		}
-	}
-}
-
-class DnsMadeEasyMethod
-{
-	const GET    = 'GET';
-	const DELETE = 'DELETE';
-	const PUT    = 'PUT';
-	const POST    = 'POST';
 }
 ?>
