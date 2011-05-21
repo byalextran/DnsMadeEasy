@@ -14,7 +14,6 @@ class DnsMadeEasy_Base
 
 		$this->_apiKey = $apiKey;
 		$this->_secretKey = $secretKey;
-		$this->_headers = array();
 	}
 
 	protected function _get($operation)
@@ -32,7 +31,12 @@ class DnsMadeEasy_Base
 		return $this->_curl($operation, 'PUT');
 	}
 
-	private function _curl($operation, $method = 'GET')
+	protected function _post($operation, $data)
+	{
+		return $this->_curl($operation, 'POST', $data);
+	}
+
+	private function _curl($operation, $method = 'GET', $postData = NULL)
 	{
 		$url = self::API_BASE_URL . $operation;
 
@@ -43,6 +47,12 @@ class DnsMadeEasy_Base
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($ch, CURLOPT_HEADERFUNCTION, array($this, '_headerCallback'));
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $this->_requestHeaders());
+
+		if ($method == 'POST') {
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+
+			print_r($postData);
+		}
 
 		// reset the header values
 		$this->_headers = array();

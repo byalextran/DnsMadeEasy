@@ -1,7 +1,7 @@
 <?php
-class DnsMadeEasy_Domains extends DnsMadeEasy_Base
+class DnsMadeEasy_Secondary extends DnsMadeEasy_Base
 {
-	const API_URL = 'domains/';
+	const API_URL = 'secondary/';
 
 	public function getAll()
 	{
@@ -9,7 +9,7 @@ class DnsMadeEasy_Domains extends DnsMadeEasy_Base
 			$apiResponse = $this->_get(self::API_URL);
 		}
 		catch (Exception $e) {
-			throw new DnsMadeEasy_Exception('Unable to get domain listing.', NULL, $e);
+			throw new DnsMadeEasy_Exception("Unable to get secondary entries.", NULL, $e);
 		}
 
 		if ($apiResponse->httpStatusCode() == 200) {
@@ -25,7 +25,7 @@ class DnsMadeEasy_Domains extends DnsMadeEasy_Base
 			$apiResponse = $this->_delete(self::API_URL);
 		}
 		catch (Exception $e) {
-			throw new DnsMadeEasy_Exception('Unable to delete all domains.', NULL, $e);
+			throw new DnsMadeEasy_Exception("Unable to delete all secondary entries.", NULL, $e);
 		}
 
 		if ($apiResponse->httpStatusCode() == 200) {
@@ -41,10 +41,11 @@ class DnsMadeEasy_Domains extends DnsMadeEasy_Base
 			$apiResponse = $this->_get(self::API_URL . $domain);
 		}
 		catch (Exception $e) {
-			throw new DnsMadeEasy_Exception("Unable to get domain: $domain.", NULL, $e);
+			throw new DnsMadeEasy_Exception("Unable to get secondary entry: $domain.", NULL, $e);
 		}
 
 		if ($apiResponse->httpStatusCode() == 200) {
+			// TODO: return secondary object
 			return json_decode($apiResponse->body(), TRUE);
 		}
 
@@ -57,7 +58,7 @@ class DnsMadeEasy_Domains extends DnsMadeEasy_Base
 			$apiResponse = $this->_delete(self::API_URL . $domain);
 		}
 		catch (Exception $e) {
-			throw new DnsMadeEasy_Exception("Unable to delete domain: $domain.", NULL, $e);
+			throw new DnsMadeEasy_Exception("Unable to delete secondary entry: $domain.", NULL, $e);
 		}
 
 		if ($apiResponse->httpStatusCode() == 200) {
@@ -73,7 +74,7 @@ class DnsMadeEasy_Domains extends DnsMadeEasy_Base
 			$apiResponse = $this->_put(self::API_URL . $domain);
 		}
 		catch (Exception $e) {
-			throw new DnsMadeEasy_Exception("Unable to add domain: $domain.", NULL, $e);
+			throw new DnsMadeEasy_Exception("Unable to add secondary entry: $domain.", NULL, $e);
 		}
 
 		if ($apiResponse->httpStatusCode() == 201) {
