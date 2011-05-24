@@ -4,16 +4,19 @@ class DnsMadeEasy_Base
 	protected $_apiKey;
 	protected $_secretKey;
 	protected $_headers;
+	protected $_test;
 
-	const API_BASE_URL = 'http://api.sandbox.dnsmadeeasy.com/V1.2/';
+	const API_BASE_URL = 'http://api.dnsmadeeasy.com/V1.2/';
+	const API_BASE_URL_TEST = 'http://api.sandbox.dnsmadeeasy.com/V1.2/';
 
-	public function __construct($apiKey, $secretKey)
+	public function __construct($apiKey, $secretKey, $test = FALSE)
 	{
 		// needed for date() functions
 		date_default_timezone_set('UTC');
 
 		$this->_apiKey = $apiKey;
 		$this->_secretKey = $secretKey;
+		$this->_test = $test;
 	}
 
 	protected function _get($operation)
@@ -38,7 +41,7 @@ class DnsMadeEasy_Base
 
 	private function _curl($operation, $method = 'GET', $postData = NULL)
 	{
-		$url = self::API_BASE_URL . $operation;
+		$url = ($this->_test ? self::API_BASE_URL_TEST : self::API_BASE_URL) . $operation;
 
 		$ch = curl_init();
 
@@ -49,9 +52,11 @@ class DnsMadeEasy_Base
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $this->_requestHeaders());
 
 		if ($method == 'POST') {
-			curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+			// TODO: get this working
+			throw new DnsMadeEasy_Exception('POST API calls not implemented yet.');
 
-			print_r($postData);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
 		}
 
 		// reset the header values
