@@ -15,10 +15,11 @@ class DnsMadeEasy
 	public $records;
 	public $secondary;
 
-	public function __construct($apiKey, $secretKey)
+	public function __construct($apiKey, $secretKey, $test)
 	{
-		$this->domains = new DnsMadeEasy_Domains($apiKey, $secretKey);
-		$this->records = new DnsMadeEasy_Records($apiKey, $secretKey);
-		$this->secondary = new DnsMadeEasy_Secondary($apiKey, $secretKey);
+		$this->domains = new DnsMadeEasy_Domains($apiKey, $secretKey, $test);
+		$this->records = new DnsMadeEasy_Records($apiKey, $secretKey, $test);
+		$this->secondary = new DnsMadeEasy_Secondary($apiKey, $secretKey, $test);
 	}
+}
 ?>
