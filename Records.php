@@ -52,7 +52,6 @@ class DnsMadeEasy_Records extends DnsMadeEasy_Base
 	public function add($domain, $record)
 	{
 		// TODO: get this function working.
-
 		$url = DnsMadeEasy_Domains::API_URL . $domain . '/' . self::API_URL;
 
 		try {
