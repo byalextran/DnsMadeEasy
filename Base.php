@@ -52,11 +52,7 @@ class DnsMadeEasy_Base
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $this->_requestHeaders());
 
 		if ($method == 'POST') {
-			// TODO: get this working
-			throw new DnsMadeEasy_Exception('POST API calls not implemented yet.');
-
-			curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
 		}
 
 		// reset the header values
@@ -102,6 +98,7 @@ class DnsMadeEasy_Base
 			"x-dnsme-apiKey: $this->_apiKey",
 			"x-dnsme-requestDate: $requestDate",
 			"x-dnsme-hmac: " . $this->_hash($requestDate),
+			'Content-Type: application/json',
 		);
 	}
 
