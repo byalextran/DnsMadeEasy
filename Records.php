@@ -23,7 +23,7 @@ class DnsMadeEasy_Records extends DnsMadeEasy_Base
 		}
 
 		if ($apiResponse->httpStatusCode() == 200) {
-			// TODO: return record objects.
+			// TODO: return array of record objects.
 			return json_decode($apiResponse->body(), TRUE);
 		}
 
@@ -42,7 +42,7 @@ class DnsMadeEasy_Records extends DnsMadeEasy_Base
 		}
 
 		if ($apiResponse->httpStatusCode() == 200) {
-			// TODO: return record objects.
+			// TODO: return record object.
 			return json_decode($apiResponse->body(), TRUE);
 		}
 
@@ -51,7 +51,6 @@ class DnsMadeEasy_Records extends DnsMadeEasy_Base
 
 	public function add($domain, $record)
 	{
-		// TODO: get this function working.
 		$url = DnsMadeEasy_Domains::API_URL . $domain . '/' . self::API_URL;
 
 		try {

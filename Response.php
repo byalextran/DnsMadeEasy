@@ -45,5 +45,7 @@ class DnsMadeEasy_Response
 	{
 		return empty($this->_headers['x-dnsme-requestsRemaining']) ? '' : $this->_headers['x-dnsme-requestsRemaining'];
 	}
+
+	public function errors() { return $this->_errors; }
 }
 ?>

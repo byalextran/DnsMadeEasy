@@ -45,7 +45,7 @@ class DnsMadeEasy_Secondary extends DnsMadeEasy_Base
 		}
 
 		if ($apiResponse->httpStatusCode() == 200) {
-			// TODO: return secondary object
+			// TODO: return secondary object.
 			return json_decode($apiResponse->body(), TRUE);
 		}
 

@@ -77,7 +77,7 @@ class DnsMadeEasy_Domains extends DnsMadeEasy_Base
 		}
 
 		if ($apiResponse->httpStatusCode() == 201) {
-			// TODO: return a Domain object instead
+			// TODO: return domain object.
 			return json_decode($apiResponse->body(), TRUE);
 		}
 
