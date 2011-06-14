@@ -24,27 +24,27 @@ class DnsMadeEasy_Base
 		$this->_test = $test;
 	}
 
-	protected function _get($operation)
+	protected function _get($operation, $successCode)
 	{
-		return $this->_curl($operation);
+		return $this->_curl($operation, 'GET', $successCode);
 	}
 
-	protected function _delete($operation)
+	protected function _delete($operation, $successCode)
 	{
-		return $this->_curl($operation, 'DELETE');
+		return $this->_curl($operation, 'DELETE', $successCode);
 	}
 
-	protected function _put($operation)
+	protected function _put($operation, $successCode)
 	{
-		return $this->_curl($operation, 'PUT');
+		return $this->_curl($operation, 'PUT', $successCode);
 	}
 
-	protected function _post($operation, $data)
+	protected function _post($operation, $data, $successCode)
 	{
-		return $this->_curl($operation, 'POST', $data);
+		return $this->_curl($operation, 'POST', $successCode, $data);
 	}
 
-	private function _curl($operation, $method = 'GET', $postData = NULL)
+	private function _curl($operation, $method, $successCode, $postData = NULL)
 	{
 		$url = ($this->_test ? self::API_BASE_URL_TEST : self::API_BASE_URL) . $operation;
 
@@ -73,7 +73,7 @@ class DnsMadeEasy_Base
 
 		curl_close($ch);
 
-		return new DnsMadeEasy_Response($apiResponse, $ci, $this->_headers);
+		return new DnsMadeEasy_Response($apiResponse, $ci, $this->_headers, $successCode);
 	}
 
 	protected function _headerCallback($ch, $header)

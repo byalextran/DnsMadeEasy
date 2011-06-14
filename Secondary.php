@@ -11,19 +11,15 @@ class DnsMadeEasy_Secondary extends DnsMadeEasy_Base
 	/**
 	 * Get list of all secondary entries.
 	 *
-	 * @return array|DnsMadeEasy_Response Returns an associative array if successful or a DnsMadeEasy_Response object if the call failed.
+	 * @return DnsMadeEasy_Response
 	 */
 	public function getAll()
 	{
 		try {
-			$apiResponse = $this->_get(self::API_URL);
+			$apiResponse = $this->_get(self::API_URL, 200);
 		}
 		catch (Exception $e) {
 			throw new DnsMadeEasy_Exception("Unable to get secondary entries.", NULL, $e);
-		}
-
-		if ($apiResponse->httpStatusCode() == 200) {
-			return json_decode($apiResponse->body(), TRUE);
 		}
 
 		return $apiResponse;
@@ -32,19 +28,15 @@ class DnsMadeEasy_Secondary extends DnsMadeEasy_Base
 	/**
 	 * Delete all secondary entries.
 	 *
-	 * @return TRUE|DnsMadeEasy_Response Returns TRUE if successful or a DnsMadeEasy_Response object if the call failed.
+	 * @return DnsMadeEasy_Response
 	 */
 	public function deleteAll()
 	{
 		try {
-			$apiResponse = $this->_delete(self::API_URL);
+			$apiResponse = $this->_delete(self::API_URL, 200);
 		}
 		catch (Exception $e) {
 			throw new DnsMadeEasy_Exception("Unable to delete all secondary entries.", NULL, $e);
-		}
-
-		if ($apiResponse->httpStatusCode() == 200) {
-			return TRUE;
 		}
 
 		return $apiResponse;
@@ -54,20 +46,15 @@ class DnsMadeEasy_Secondary extends DnsMadeEasy_Base
 	 * Get information about a secondary entry.
 	 *
 	 * @param string $entry The entry to retrieve (e.g., <code>foobar.com</code>).
-	 * @return array|DnsMadeEasy_Response Returns an associative array if successful or a DnsMadeEasy_Response object if the call failed.
+	 * @return DnsMadeEasy_Response
 	 */
 	public function get($entry)
 	{
 		try {
-			$apiResponse = $this->_get(self::API_URL . $entry);
+			$apiResponse = $this->_get(self::API_URL . $entry, 200);
 		}
 		catch (Exception $e) {
 			throw new DnsMadeEasy_Exception("Unable to get secondary entry: $entry.", NULL, $e);
-		}
-
-		if ($apiResponse->httpStatusCode() == 200) {
-			// TODO: return secondary object.
-			return json_decode($apiResponse->body(), TRUE);
 		}
 
 		return $apiResponse;
@@ -77,19 +64,15 @@ class DnsMadeEasy_Secondary extends DnsMadeEasy_Base
 	 * Delete a secondary entry.
 	 *
 	 * @param string $entry The entry to delete (e.g., <code>foobar.com</code>).
-	 * @return TRUE|DnsMadeEasy_Response Returns TRUE if successful or a DnsMadeEasy_Response object if the call failed.
+	 * @return DnsMadeEasy_Response
 	 */
 	public function delete($entry)
 	{
 		try {
-			$apiResponse = $this->_delete(self::API_URL . $entry);
+			$apiResponse = $this->_delete(self::API_URL . $entry, 200);
 		}
 		catch (Exception $e) {
 			throw new DnsMadeEasy_Exception("Unable to delete secondary entry: $entry.", NULL, $e);
-		}
-
-		if ($apiResponse->httpStatusCode() == 200) {
-			return TRUE;
 		}
 
 		return $apiResponse;
@@ -99,20 +82,15 @@ class DnsMadeEasy_Secondary extends DnsMadeEasy_Base
 	 * Add a secondary entry.
 	 *
 	 * @param string $entry The entry to add (e.g., <code>foobar.com</code>).
-	 * @return array|DnsMadeEasy_Response Returns an associative array if successful or a DnsMadeEasy_Response object if the call failed.
+	 * @return DnsMadeEasy_Response
 	 */
 	public function add($entry)
 	{
 		try {
-			$apiResponse = $this->_put(self::API_URL . $entry);
+			$apiResponse = $this->_put(self::API_URL . $entry, 201);
 		}
 		catch (Exception $e) {
 			throw new DnsMadeEasy_Exception("Unable to add secondary entry: $entry.", NULL, $e);
-		}
-
-		if ($apiResponse->httpStatusCode() == 201) {
-			// TODO: return a Domain object instead
-			return json_decode($apiResponse->body(), TRUE);
 		}
 
 		return $apiResponse;

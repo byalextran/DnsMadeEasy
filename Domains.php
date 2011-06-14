@@ -11,19 +11,15 @@ class DnsMadeEasy_Domains extends DnsMadeEasy_Base
 	/**
 	 * Get list of all domain names.
 	 *
-	 * @return array|DnsMadeEasy_Response Returns an array if successful or a DnsMadeEasy_Response object if the call failed.
+	 * @return DnsMadeEasy_Response
 	 */
 	public function getAll()
 	{
 		try {
-			$apiResponse = $this->_get(self::API_URL);
+			$apiResponse = $this->_get(self::API_URL, 200);
 		}
 		catch (Exception $e) {
 			throw new DnsMadeEasy_Exception('Unable to get domain listing.', NULL, $e);
-		}
-
-		if ($apiResponse->httpStatusCode() == 200) {
-			return json_decode($apiResponse->body(), TRUE);
 		}
 
 		return $apiResponse;
@@ -32,19 +28,15 @@ class DnsMadeEasy_Domains extends DnsMadeEasy_Base
 	/**
 	 * Delete all domains.
 	 *
-	 * @return TRUE|DnsMadeEasy_Response Returns TRUE if successful or a DnsMadeEasy_Response object if the call failed.
+	 * @return DnsMadeEasy_Response
 	 */
 	public function deleteAll()
 	{
 		try {
-			$apiResponse = $this->_delete(self::API_URL);
+			$apiResponse = $this->_delete(self::API_URL, 200);
 		}
 		catch (Exception $e) {
 			throw new DnsMadeEasy_Exception('Unable to delete all domains.', NULL, $e);
-		}
-
-		if ($apiResponse->httpStatusCode() == 200) {
-			return TRUE;
 		}
 
 		return $apiResponse;
@@ -54,19 +46,15 @@ class DnsMadeEasy_Domains extends DnsMadeEasy_Base
 	 * Get information about a domain.
 	 *
 	 * @param string $domain The domain to retrieve (e.g., <code>foobar.com</code>).
-	 * @return array|DnsMadeEasy_Response Returns an associative array if successful or a DnsMadeEasy_Response object if the call failed.
+	 * @return DnsMadeEasy_Response
 	 */
 	public function get($domain)
 	{
 		try {
-			$apiResponse = $this->_get(self::API_URL . $domain);
+			$apiResponse = $this->_get(self::API_URL . $domain, 200);
 		}
 		catch (Exception $e) {
 			throw new DnsMadeEasy_Exception("Unable to get domain: $domain.", NULL, $e);
-		}
-
-		if ($apiResponse->httpStatusCode() == 200) {
-			return json_decode($apiResponse->body(), TRUE);
 		}
 
 		return $apiResponse;
@@ -76,19 +64,15 @@ class DnsMadeEasy_Domains extends DnsMadeEasy_Base
 	 * Delete a domain.
 	 *
 	 * @param string $domain The domain to delete (e.g., <code>foobar.com</code>).
-	 * @return TRUE|DnsMadeEasy_Response Returns TRUE if successful or a DnsMadeEasy_Response object if the call failed.
+	 * @return DnsMadeEasy_Response
 	 */
 	public function delete($domain)
 	{
 		try {
-			$apiResponse = $this->_delete(self::API_URL . $domain);
+			$apiResponse = $this->_delete(self::API_URL . $domain, 200);
 		}
 		catch (Exception $e) {
 			throw new DnsMadeEasy_Exception("Unable to delete domain: $domain.", NULL, $e);
-		}
-
-		if ($apiResponse->httpStatusCode() == 200) {
-			return TRUE;
 		}
 
 		return $apiResponse;
@@ -98,20 +82,15 @@ class DnsMadeEasy_Domains extends DnsMadeEasy_Base
 	 * Add a domain.
 	 *
 	 * @param string $domain The domain to add (e.g., <code>foobar.com</code>).
-	 * @return array|DnsMadeEasy_Response Returns an associative array if successful or a DnsMadeEasy_Response object if the call failed.
+	 * @return DnsMadeEasy_Response
 	 */
 	public function add($domain)
 	{
 		try {
-			$apiResponse = $this->_put(self::API_URL . $domain);
+			$apiResponse = $this->_put(self::API_URL . $domain, 201);
 		}
 		catch (Exception $e) {
 			throw new DnsMadeEasy_Exception("Unable to add domain: $domain.", NULL, $e);
-		}
-
-		if ($apiResponse->httpStatusCode() == 201) {
-			// TODO: return domain object.
-			return json_decode($apiResponse->body(), TRUE);
 		}
 
 		return $apiResponse;

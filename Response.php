@@ -11,7 +11,7 @@ class DnsMadeEasy_Response
 	private $_headers;
 	private $_errors;
 
-	public function __construct($body, $curlInfo, $headers)
+	public function __construct($body, $curlInfo, $headers, $successCode)
 	{
 		$this->_body = $body;
 		$this->_curlInfo = $curlInfo;
@@ -22,6 +22,11 @@ class DnsMadeEasy_Response
 
 		if (!empty($errors) && isset($errors['error'])) {
 			$this->_errors = $errors['error'];
+		}
+
+		if (!$this->_errors && $this->httpStatusCode() !== $successCode) {
+			// API calls don't always provide an error. suck.
+			$this->_errors[] = 'An error occurred, however, no error message was given. Use the response body, HTTP status code and URL to help troubleshoot the issue.';
 		}
 	}
 
@@ -42,9 +47,15 @@ class DnsMadeEasy_Response
 	}
 
 	/**
-	 * @return mixed The response from the API call.
+	 * @return mixed The raw response from the API call.
 	 */
-	public function body() { return $this->_body; }
+	public function rawBody() { return $this->_body; }
+
+	/**
+	 * @param bool $associative Set to TRUE to return an associative array (otherwise, an object will be returned).
+	 * @return mixed Returns the JSON decoded response from the API call.
+	 */
+	public function body($associative = FALSE) { return json_decode($this->_body, $associative); }
 
 	/**
 	 * @return string The unique identifier for the API call.
