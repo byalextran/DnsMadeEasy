@@ -9,7 +9,6 @@ $dme = new DnsMadeEasy('yourApiKey', 'yourSecretKey', TRUE);
 h5. Adding a domain
 
 bc.. $result = $dme->domains->add('foobar.com');
-$result = $dme->domains->add('foobar.com');
 
 if ($errors = $result->errors()) {
 	print_r($errors);
@@ -29,7 +28,6 @@ else {
 h5. Adding a DNS record
 
 bc.. $record = array(
-$record = array(
 	'name' => '',
 	'type' => 'A',
 	'data' => '2.4.8.16',
