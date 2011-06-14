@@ -6,11 +6,12 @@
 // log into your DNS Made Easy account to generate/obtain your API key and secret key.
 // specify TRUE for the last parameter if you want to make test API calls.
 $dme = new DnsMadeEasy('yourApiKey', 'yourSecretKey', TRUE);
+```
 
 #### Adding a domain
 
-```
-php $result = $dme->domains->add('foobar.com');
+```php
+$result = $dme->domains->add('foobar.com');
 
 if ($errors = $result->errors()) {
 	print_r($errors);
