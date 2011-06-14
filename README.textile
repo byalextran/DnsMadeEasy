@@ -10,7 +10,7 @@ $dme = new DnsMadeEasy('yourApiKey', 'yourSecretKey', TRUE);
 
 h5. Adding a domain
 
-<code>
+bc..
 $result = $dme->domains->add('foobar.com');
 
 if ($errors = $result->errors()) {
@@ -27,11 +27,10 @@ else {
 	// output the name servers associated with this domain.
 	print_r($domain->nameServer);
 }
-</code>
 
 h5. Adding a DNS record
 
-<code>
+bc..
 $record = array(
 	'name' => '',
 	'type' => 'A',
@@ -52,4 +51,3 @@ else {
 	// output the assigned record ID
 	print_r($record->id);
 }
-</code>
