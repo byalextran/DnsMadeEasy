@@ -1,4 +1,9 @@
 <?php
+/**
+ * Provides base functionality required for all DNS Made Easy API calls.
+ *
+ * @package DnsMadeEasy
+ */
 class DnsMadeEasy_Base
 {
 	protected $_apiKey;

@@ -1,8 +1,18 @@
 <?php
+/**
+ * Provides access to domain-related API calls.
+ *
+ * @package DnsMadeEasy
+ */
 class DnsMadeEasy_Domains extends DnsMadeEasy_Base
 {
 	const API_URL = 'domains/';
 
+	/**
+	 * Get list of all domain names.
+	 *
+	 * @return array|DnsMadeEasy_Response Returns an array if successful or a DnsMadeEasy_Response object if the call failed.
+	 */
 	public function getAll()
 	{
 		try {
@@ -19,6 +29,11 @@ class DnsMadeEasy_Domains extends DnsMadeEasy_Base
 		return $apiResponse;
 	}
 
+	/**
+	 * Delete all domains.
+	 *
+	 * @return TRUE|DnsMadeEasy_Response Returns TRUE if successful or a DnsMadeEasy_Response object if the call failed.
+	 */
 	public function deleteAll()
 	{
 		try {
@@ -35,6 +50,12 @@ class DnsMadeEasy_Domains extends DnsMadeEasy_Base
 		return $apiResponse;
 	}
 
+	/**
+	 * Get information about a domain.
+	 *
+	 * @param string $domain The domain to retrieve (e.g., <code>foobar.com</code>).
+	 * @return array|DnsMadeEasy_Response Returns an associative array if successful or a DnsMadeEasy_Response object if the call failed.
+	 */
 	public function get($domain)
 	{
 		try {
@@ -51,6 +72,12 @@ class DnsMadeEasy_Domains extends DnsMadeEasy_Base
 		return $apiResponse;
 	}
 
+	/**
+	 * Delete a domain.
+	 *
+	 * @param string $domain The domain to delete (e.g., <code>foobar.com</code>).
+	 * @return TRUE|DnsMadeEasy_Response Returns TRUE if successful or a DnsMadeEasy_Response object if the call failed.
+	 */
 	public function delete($domain)
 	{
 		try {
@@ -67,6 +94,12 @@ class DnsMadeEasy_Domains extends DnsMadeEasy_Base
 		return $apiResponse;
 	}
 
+	/**
+	 * Add a domain.
+	 *
+	 * @param string $domain The domain to add (e.g., <code>foobar.com</code>).
+	 * @return array|DnsMadeEasy_Response Returns an associative array if successful or a DnsMadeEasy_Response object if the call failed.
+	 */
 	public function add($domain)
 	{
 		try {
