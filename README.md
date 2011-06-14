@@ -1,14 +1,16 @@
-h3. Example Usage
+### Example Usage
 
-h5. Create an instance of the DnsMadeEasy class
+#### Create an instance of the DnsMadeEasy class
 
-bc.. // log into your DNS Made Easy account to generate/obtain your API key and secret key.
+```php
+// log into your DNS Made Easy account to generate/obtain your API key and secret key.
 // specify TRUE for the last parameter if you want to make test API calls.
 $dme = new DnsMadeEasy('yourApiKey', 'yourSecretKey', TRUE);
 
-h5. Adding a domain
+#### Adding a domain
 
-bc.. $result = $dme->domains->add('foobar.com');
+```
+php $result = $dme->domains->add('foobar.com');
 
 if ($errors = $result->errors()) {
 	print_r($errors);
@@ -24,10 +26,12 @@ else {
 	// output the name servers associated with this domain.
 	print_r($domain->nameServer);
 }
+```
 
-h5. Adding a DNS record
+#### Adding a DNS record
 
-bc.. $record = array(
+```php
+$record = array(
 	'name' => '',
 	'type' => 'A',
 	'data' => '2.4.8.16',
@@ -47,3 +51,4 @@ else {
 	// output the assigned record ID
 	print_r($record->id);
 }
+```
