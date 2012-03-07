@@ -16,9 +16,6 @@ class DnsMadeEasy_Base
 
 	public function __construct($apiKey, $secretKey, $test = FALSE)
 	{
-		// needed for date() functions
-		date_default_timezone_set('UTC');
-
 		$this->_apiKey = $apiKey;
 		$this->_secretKey = $secretKey;
 		$this->_test = $test;
@@ -97,7 +94,7 @@ class DnsMadeEasy_Base
 
 	protected function _requestHeaders()
 	{
-		$requestDate = date('r');
+		$requestDate = gmdate('r');
 
 		return array(
 			"x-dnsme-apiKey: $this->_apiKey",
