@@ -1,0 +1,14 @@
+{
+	"name": "a1extran/DnsMadeEasy",
+	"description": "PHP wrapper for the Dns Made Easy API.",
+	"homepage": "http://github.com/a1extran/DnsMadeEasy",
+	"authors": [
+		{
+			"name": "Alex Tran",
+			"homepage": "http://alextran.org",
+		}
+	],
+	"require": {
+		"php": ">=5.3.0"
+	}
+}
