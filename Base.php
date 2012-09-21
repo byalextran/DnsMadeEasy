@@ -31,9 +31,9 @@ class DnsMadeEasy_Base
 		return $this->_curl($operation, 'DELETE', $successCode);
 	}
 
-	protected function _put($operation, $successCode)
+	protected function _put($operation, $data, $successCode)
 	{
-		return $this->_curl($operation, 'PUT', $successCode);
+		return $this->_curl($operation, 'PUT', $successCode, $data);
 	}
 
 	protected function _post($operation, $data, $successCode)
@@ -54,6 +54,12 @@ class DnsMadeEasy_Base
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $this->_requestHeaders());
 
 		if ($method == 'POST') {
+			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
+		}
+		else if ($method == 'PUT') {
+			curl_setopt($ch, CURLOPT_HTTPHEADER,  // Ask the remote end to PUT, curl won't PUT a raw body
+				    array_merge(array('X-HTTP-Method-Override: PUT'), $this->_requestHeaders()));
+			curl_setopt($ch, CURLOPT_POST, true);
 			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
 		}
 
