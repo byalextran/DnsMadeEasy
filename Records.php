@@ -100,5 +100,19 @@ class DnsMadeEasy_Records extends DnsMadeEasy_Base
 
 		return $apiResponse;
 	}
+
+	public function update($domain, $recordId, $record)
+	{
+		$url = DnsMadeEasy_Domains::API_URL . $domain . '/' . self::API_URL . $recordId;
+
+		try {
+			$apiResponse = $this->_put($url, $record, 200);
+		}
+		catch (Exception $e) {
+			throw new DnsMadeEasy_Exception("Unable to put record $recordId from $domain.", NULL, $e);
+		}
+
+		return $apiResponse;
+	}
 }
 ?>
