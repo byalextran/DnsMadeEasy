@@ -101,6 +101,14 @@ class DnsMadeEasy_Records extends DnsMadeEasy_Base
 		return $apiResponse;
 	}
 
+	/**
+	 * Update an existing DNS record for a domain.
+	 *
+	 * @param string $domain The domain to update a record for (e.g., <code>foobar.com</code>).
+	 * @param int $recordId The record ID to update.
+	 * @param array $record An associative array representing the record to update.
+	 * @return DnsMadeEasy_Response
+	 */
 	public function update($domain, $recordId, $record)
 	{
 		$url = DnsMadeEasy_Domains::API_URL . $domain . '/' . self::API_URL . $recordId;
@@ -109,7 +117,7 @@ class DnsMadeEasy_Records extends DnsMadeEasy_Base
 			$apiResponse = $this->_put($url, $record, 200);
 		}
 		catch (Exception $e) {
-			throw new DnsMadeEasy_Exception("Unable to put record $recordId from $domain.", NULL, $e);
+			throw new DnsMadeEasy_Exception("Unable to update record $recordId in $domain.", NULL, $e);
 		}
 
 		return $apiResponse;
