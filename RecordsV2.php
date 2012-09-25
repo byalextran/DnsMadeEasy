@@ -53,9 +53,6 @@ class DnsMadeEasy_RecordsV2 extends DnsMadeEasy_BaseV2
 	{
 		$url = DnsMadeEasy_DomainsV2::API_URL . '/' . $domainId . '/' . self::API_URL;
 
-        // NOTE: per the API docs, this should be a 200 status code on success
-        // but per testing against the live API, it's currently 201.  Bug submitted on it
-        // (#DBZ-616-65898), we'll see what happens
 		try {
 			$apiResponse = $this->_post($url, $record, 201);
 		}
